@@ -4,4 +4,4 @@ Make sure node is installed
 
 Install http-server from this directory - sudo npm install -g http-server
 
-navigate to http://localhost:8080/calc.html
+navigate to https://eviltester.github.io/synchole/collapseable.html
