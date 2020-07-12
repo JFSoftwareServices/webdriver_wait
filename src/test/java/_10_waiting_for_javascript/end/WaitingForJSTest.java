@@ -1,7 +1,10 @@
 package _10_waiting_for_javascript.end;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -15,24 +18,29 @@ public class WaitingForJSTest {
     WebDriver driver;
 
     @BeforeAll
-    public static void setupDriver(){
+    public static void setupDriver() {
         WebDriverManager.chromedriver().setup();
     }
 
+    /**
+     * Test synchronisation on both internal javascript state (low level conditions) of the application and external
+     * application state in the gui. This makes the test more robust. Sometimes we need to also synchronise on low level
+     * conditions too to get robustness.
+     */
     @Test
-    public void waitingExampleUsingExpectedConditions(){
+    public void waitingExampleUsingExpectedConditions() {
 
         driver = new ChromeDriver();
 
         driver.get("https://eviltester.github.io/synchole/messages.html");
 
-        new WebDriverWait(driver,20).until(
+        new WebDriverWait(driver, 20).until(
                 ExpectedConditions.jsReturnsValue(
                         "return (window.totalMessagesReceived>0 && "
                                 +
                                 "window.renderingQueueCount==0 ? 'true' : null)"));
 
-        new WebDriverWait(driver,20).until(
+        new WebDriverWait(driver, 20).until(
                 ExpectedConditions.textToBePresentInElementLocated(
                         By.id("messagecount"),
                         "Message Count: 0 : 0"));
@@ -41,23 +49,29 @@ public class WaitingForJSTest {
                 driver.findElement(By.id("messagecount")).getText());
     }
 
+    /**
+     * Test synchronisation on both internal javascript state (low level conditions) of the application and external
+     * application state in the gui. This makes the test more robust. Sometimes we need to also synchronise on low level
+     * conditions too to get robustness.
+     */
     @Test
-    public void waitingExampleUsingJavaClosures(){
+    public void waitingExampleUsingJavaClosures() {
 
         driver = new ChromeDriver();
 
         driver.get("https://eviltester.github.io/synchole/messages.html");
 
-        ExpectedCondition renderingQueueIsEmpty = driver ->{
+        ExpectedCondition renderingQueueIsEmpty = driver -> {
             JavascriptExecutor js = (JavascriptExecutor) driver;
-            String value = (String)js.executeScript(
+            String value = (String) js.executeScript(
                     "return (window.totalMessagesReceived>0 && "
                             +
                             "window.renderingQueueCount==0 ? 'true' : null)");
-            return value!=null;
+            System.out.println(value != null);
+            return value != null;
         };
 
-        new WebDriverWait(driver,20).until(renderingQueueIsEmpty);
+        new WebDriverWait(driver, 20).until(renderingQueueIsEmpty);
 
 //        new WebDriverWait(driver,20).until(
 //                ExpectedConditions.jsReturnsValue(
@@ -65,7 +79,7 @@ public class WaitingForJSTest {
 //                                +
 //                                "window.renderingQueueCount==0 ? 'true' : null)"));
 
-        new WebDriverWait(driver,20).until(
+        new WebDriverWait(driver, 20).until(
                 ExpectedConditions.textToBePresentInElementLocated(
                         By.id("messagecount"),
                         "Message Count: 0 : 0"));
@@ -76,7 +90,7 @@ public class WaitingForJSTest {
 
 
     @Test
-    public void waitingExampleUsingAsyncAsATimeout(){
+    public void waitingExampleUsingAsyncAsATimeout() {
 
         driver = new ChromeDriver();
 
@@ -86,7 +100,7 @@ public class WaitingForJSTest {
         exec.executeAsyncScript(
                 "window.onMessageQueueEmpty(arguments[arguments.length-1])");
 
-        new WebDriverWait(driver,20).until(
+        new WebDriverWait(driver, 20).until(
                 ExpectedConditions.textToBePresentInElementLocated(
                         By.id("messagecount"),
                         "Message Count: 0 : 0"));
@@ -94,8 +108,9 @@ public class WaitingForJSTest {
         Assertions.assertEquals("Message Count: 0 : 0",
                 driver.findElement(By.id("messagecount")).getText());
     }
+
     @AfterEach
-    public void closeDriver(){
+    public void closeDriver() {
         driver.close();
     }
 
